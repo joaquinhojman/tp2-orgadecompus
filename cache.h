@@ -35,7 +35,7 @@ unsigned int find_set(int address);
 //unsigned int find_lru(int setnum);
 unsigned int find_earliest(int setnum);//
 
-unsigned int is_dirty(int way, int setnum);//
+//unsigned int is_dirty(int way, int setnum);//
 
 void read_block(int blocknum);
 
