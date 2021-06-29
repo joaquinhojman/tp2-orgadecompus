@@ -101,11 +101,11 @@ unsigned int find_lru(int setnum) {
     return 0; // Should not happen
 }
 */
-
+/*
 unsigned int is_dirty(int way, int setnum) {
     unsigned int blocknum = cache_block_number(way, setnum);
     return cache_memory.memory[blocknum].D;
-}
+}*/
 
 
 unsigned int find_tag(int address) {
