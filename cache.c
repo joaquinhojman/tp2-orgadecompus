@@ -14,7 +14,6 @@ void initialize_blocks() {
         if (cache_memory.memory[i].data == NULL)
             return;
         cache_memory.memory[i].V = 0;
-        cache_memory.memory[i].D = 0;
         cache_memory.memory[i].lru_value = 0;
     }
 }
@@ -101,11 +100,6 @@ unsigned int find_lru(int setnum) {
     return 0; // Should not happen
 }
 */
-/*
-unsigned int is_dirty(int way, int setnum) {
-    unsigned int blocknum = cache_block_number(way, setnum);
-    return cache_memory.memory[blocknum].D;
-}*/
 
 
 unsigned int find_tag(int address) {
@@ -150,7 +144,7 @@ void move_block_to_cache(int blocknum) {
     int spot = find_spot(address);
 
     //TODO Bit D no existe en WT.
-    if (cache_memory.memory[spot].V == 1 && cache_memory.memory[spot].D == 1)
+    if (cache_memory.memory[spot].V == 1)
         write_block((int) (spot % (int) ways),
                     spot / (int) ways); // Prev cache block -> Memory
 
@@ -218,7 +212,6 @@ void write_byte(int address, unsigned char value) {
 
     int slot = hit(address); // Hay hit por el read_block anterior
     cache_memory.memory[slot].data[get_byte_offset((u_int) address)] = value;
-    cache_memory.memory[slot].D = 1;
 }
 
 int get_miss_rate() {
