@@ -7,7 +7,6 @@
 
 typedef struct block {
     unsigned char *data;
-    int lru_value;
     int fifo_value;
     unsigned int tag: 12;
     unsigned int V: 1;

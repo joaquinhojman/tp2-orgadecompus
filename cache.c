@@ -14,7 +14,7 @@ void initialize_blocks() {
         if (cache_memory.memory[i].data == NULL)
             return;
         cache_memory.memory[i].V = 0;
-        cache_memory.memory[i].lru_value = 0;
+        cache_memory.memory[i].fifo_value = 0;
     }
 }
 
@@ -41,29 +41,8 @@ unsigned int cache_block_number(int way, int setnum) {
     return (u_int) setnum * ways + (u_int) way;
 }
 
-/*
-void lru_update(int new_blocknum) {
-    int prev_lru_value = cache_memory.memory[new_blocknum].lru_value; // 0 if new
-    int blocknum;
-    for (int i = 0; i < ways; i++) {
-        blocknum = (int) cache_block_number(i,
-                                            (new_blocknum -
-                                             new_blocknum % (int) ways) /
-                                            (int) ways);
-        if (cache_memory.memory[blocknum].V == 1) {
-            if (blocknum == new_blocknum) {
-                cache_memory.memory[blocknum].lru_value = 1;
-            } else {
-                if (cache_memory.memory[blocknum].lru_value < prev_lru_value ||
-                    prev_lru_value == 0)
-                    cache_memory.memory[blocknum].lru_value++;
-            }
-        }
-    }
-}
-*/
 void last_in_update(int new_blocknum) {
-    int prev_lru_value = cache_memory.memory[new_blocknum].lru_value; // 0 if new
+    int prev_fifo_value = cache_memory.memory[new_blocknum].fifo_value; // 0 if new
     int blocknum;
     for (int i = 0; i < ways; i++) {
         blocknum = (int) cache_block_number(i,
@@ -72,11 +51,11 @@ void last_in_update(int new_blocknum) {
                                             (int) ways);
         if (cache_memory.memory[blocknum].V == 1) {
             if (blocknum == new_blocknum) {
-                cache_memory.memory[blocknum].lru_value = 1;
+                cache_memory.memory[blocknum].fifo_value = 1;
             } else {
-                if (cache_memory.memory[blocknum].lru_value < prev_lru_value ||
-                    prev_lru_value == 0)
-                    cache_memory.memory[blocknum].lru_value++;
+                if (cache_memory.memory[blocknum].fifo_value < prev_fifo_value ||
+                    prev_fifo_value == 0)
+                    cache_memory.memory[blocknum].fifo_value++;
             }
         }
     }
@@ -90,17 +69,6 @@ unsigned int find_earliest(int setnum){
     }
     return 0; // Should not happen
 }
-/*
-unsigned int find_lru(int setnum) {
-    for (int i = 0; i < ways; i++) {
-        if (cache_memory.memory[cache_block_number(i, setnum)].lru_value ==
-            ways)
-            return cache_block_number(i, setnum);
-    }
-    return 0; // Should not happen
-}
-*/
-
 
 unsigned int find_tag(int address) {
     return (u_int)(address >> (int) log2(block_size))
@@ -135,7 +103,6 @@ int find_spot(int address) {
         }
     }
 
-    //return (int) find_lru((int) set); TODO remove
     return (int) find_earliest((int) set);
 }
 
@@ -143,7 +110,6 @@ void move_block_to_cache(int blocknum) {
     int address = blocknum << (int) log2(block_size);
     int spot = find_spot(address);
 
-    //TODO Bit D no existe en WT.
     if (cache_memory.memory[spot].V == 1)
         write_block((int) (spot % (int) ways),
                     spot / (int) ways); // Prev cache block -> Memory
@@ -154,7 +120,6 @@ void move_block_to_cache(int blocknum) {
 
     cache_memory.memory[spot].tag = find_tag(address) & 0xFFF;
 
-    //lru_update(spot); TODO remove
     last_in_update(spot);
 }
 
@@ -167,7 +132,6 @@ void read_block(int blocknum) {
         move_block_to_cache(blocknum);
         cache_memory.miss_amount++;
     } else { // HIT
-        //lru_update(hit_position); TODO remove
         cache_memory.hit_amount++;
     }
 }
