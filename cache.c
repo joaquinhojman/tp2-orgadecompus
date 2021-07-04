@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 
+
+void write_block(int way, int setnum); //TODO chequear la necesidad de la función
+
+
 void set_all_principal_memory_zero() {
     for (int i = 0; i < PRINCIPAL_MEMORY_SIZE; i++)
         principal_memory[i] = 0;
@@ -76,7 +80,7 @@ unsigned int find_tag(int address) {
 }
 
 // returns -1 if is not hit, otherwise returns blocknum
-int hit(int address) {
+int hit_blocknum(int address) {
     unsigned int set = find_set(address);
     unsigned int tag = find_tag(address);
 
@@ -123,10 +127,10 @@ void move_block_to_cache(int blocknum) {
     last_in_update(spot);
 }
 
-// El llamado asumimos que se puede hacer con bloques que hagan hit
+// El llamado asumimos que se puede hacer con bloques que hagan hit //TODO check this comment
 void read_block(int blocknum) {
     int address = blocknum << (int) log2(block_size);
-    int hit_position = hit(address);
+    int hit_position = hit_blocknum(address);
 
     if (hit_position == -1) { // NO HIT
         move_block_to_cache(blocknum);
@@ -164,18 +168,34 @@ unsigned int get_byte_offset(unsigned int address) {
             >> (unsigned int) (sizeof(int) * 8 - log2(block_size));
 }
 
-unsigned char read_byte(int address) {
+unsigned char read_byte(int address, char * hit) {
+    size_t temp_hit_amount = cache_memory.hit_amount;
     read_block(address >> (int) log2(block_size));
-
-    int slot = hit(address); // Hay hit por el read_block anterior
+    if (cache_memory.hit_amount == temp_hit_amount+1){
+        *hit = '1';
+    }else{
+        *hit = '0';
+    }
+    int slot = hit_blocknum(address); // Hay hit por el read_block anterior
     return cache_memory.memory[slot].data[get_byte_offset((u_int) address)];
 }
 
-void write_byte(int address, unsigned char value) {
+void write_byte_tomem(int address, unsigned char value) {
+    principal_memory[address] = value;
+}
+
+char write_byte(int address, unsigned char value) {
+    size_t temp_hit_amount = cache_memory.hit_amount;
     read_block(address >> (int) log2(block_size));
 
-    int slot = hit(address); // Hay hit por el read_block anterior
+    int slot = hit_blocknum(address); // Hay hit por el read_block anterior
     cache_memory.memory[slot].data[get_byte_offset((u_int) address)] = value;
+    
+    if (cache_memory.hit_amount == temp_hit_amount+1){
+        return '1';
+    }else{
+        return '0';
+    }    
 }
 
 int get_miss_rate() {

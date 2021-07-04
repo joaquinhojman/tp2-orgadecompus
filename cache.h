@@ -34,13 +34,11 @@ unsigned int find_earliest(int setnum);//
 
 void read_block(int blocknum);
 
-void write_byte_tomem(int address, char value);
+unsigned char read_byte(int address, char * hit);
 
-void write_block(int way, int setnum);
+void write_byte_tomem(int address, unsigned char value);
 
-unsigned char read_byte(int address);//
-
-void write_byte(int address, unsigned char value);
+char write_byte(int address, unsigned char value);
 
 int get_miss_rate();
 
