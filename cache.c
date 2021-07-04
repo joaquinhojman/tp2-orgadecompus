@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
-
+/*
 void write_block(int way, int setnum); //TODO chequear la necesidad de la función
-
+*/
 
 void set_all_principal_memory_zero() {
     for (int i = 0; i < PRINCIPAL_MEMORY_SIZE; i++)
@@ -114,10 +114,13 @@ void move_block_to_cache(int blocknum) {
     int address = blocknum << (int) log2(block_size);
     int spot = find_spot(address);
 
+/* (TODO REMOVE)ESTO ES WRITE_BACK, NOSOTROS TENEMOS WRITE_THROGUH, 
+    ESCRIBIMOS SIEMPRE EN MEMORIA, NO TENEMOS Q VOLVER A IR
+    DESDE CACHÉ A MEMORIA DESPUES
     if (cache_memory.memory[spot].V == 1)
         write_block((int) (spot % (int) ways),
                     spot / (int) ways); // Prev cache block -> Memory
-
+*/
     memcpy(cache_memory.memory[spot].data,
            &principal_memory[address],
            block_size);
@@ -148,7 +151,7 @@ int get_address(int way, int setnum) {
 
     return address;
 }
-
+/* !TODO REMOVE
 void write_block(int way, int setnum) {
     // TODO remove. Esta función no debería existir, 
     // siempre se escribe en memoria lo que está en el caché
@@ -161,7 +164,7 @@ void write_block(int way, int setnum) {
                block_size);
     }
 }
-
+*/
 unsigned int get_byte_offset(unsigned int address) {
     return (unsigned int) (address
             << (unsigned int) (sizeof(int) * 8 - log2(block_size)))
@@ -190,6 +193,8 @@ char write_byte(int address, unsigned char value) {
 
     int slot = hit_blocknum(address); // Hay hit por el read_block anterior
     cache_memory.memory[slot].data[get_byte_offset((u_int) address)] = value;
+    
+    write_byte_tomem(address, value);
     
     if (cache_memory.hit_amount == temp_hit_amount+1){
         return '1';
