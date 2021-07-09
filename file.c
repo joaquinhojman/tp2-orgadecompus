@@ -69,10 +69,9 @@ size_t file_iterate(file_t* self){
 			 "Escritura del valor %i en la posición %i: %s\n", value, dir, *buf);
         }else if(**buf=='R'){
         	int dir = parse_int(buf, ' ', '\n');
-        	size_t temp = cache_memory.hit_amount; 
         	char hit;
-        	unsigned char result = read_byte(dir, &hit);//TODO computar hits con "hit"? o dejarlo como está?.
-        	(temp == cache_memory.hit_amount)?
+        	unsigned char result = read_byte(dir, &hit);
+        	(hit=='0')?
         		strcpy(*buf, "MISS\0"):strcpy(*buf, "HIT\0");
 			fprintf(self->file_writer,
 				"Lectura del valor %i en la posicion %i: %s\n", result, dir, *buf);

@@ -30,7 +30,7 @@ void init();
 
 unsigned int find_set(int address);
 
-unsigned int find_earliest(int setnum);//
+unsigned int find_earliest(int setnum);
 
 void read_block(int blocknum);
 
